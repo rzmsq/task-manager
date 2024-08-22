@@ -1,7 +1,7 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
-#include <iterator>
 
 #include <nlohmann/json.hpp>
 
@@ -53,23 +53,17 @@ class TaskManager
 {
 private:
     std::vector<Task> tasks;
+    const std::string path{"./tasks.json"};
 
 public:
-    TaskManager();
-    ~TaskManager();
+    TaskManager() {};
+    ~TaskManager() {};
 
     const void add_task(const Task &task);
     const void delete_task(const size_t &id);
     const void print_tasks() const;
+    const void save_to_json() const;
 };
-
-TaskManager::TaskManager(/* args */)
-{
-}
-
-TaskManager::~TaskManager()
-{
-}
 
 const void TaskManager::add_task(const Task &task)
 {
@@ -78,16 +72,47 @@ const void TaskManager::add_task(const Task &task)
 
 const void TaskManager::delete_task(const size_t &id)
 {
-    tasks.erase(tasks.begin() + id);
+    tasks.erase(tasks.begin() + (id - 1));
 }
 
 const void TaskManager::print_tasks() const
 {
+    size_t ind{0};
     for (auto &&task : this->tasks)
     {
         const std::string Compl = task.getCompl() ? "Completed" : "In progress";
-        std::cout << task.getTitle() << "\t|" << task.getDescription()
-                  << "\t|" << task.getTime() << "\t|" << Compl << std::endl;
+        std::cout << ind << "|\t|" << task.getTitle() << "|\t|" << task.getDescription()
+                  << "|\t|" << task.getTime() << "|\t|" << Compl << std::endl;
+        ind++;
+    }
+}
+
+const void TaskManager::save_to_json() const
+{
+    using json = nlohmann::json;
+    try
+    {
+        std::ofstream f(path, std::ios_base::app);
+        if (!f.is_open())
+            throw "err";
+
+        json jsonTasks{};
+        size_t ind{0};
+        for (auto &&task : tasks)
+        {
+            jsonTasks["id"][std::to_string(ind)]["title"] = task.getTitle();
+            jsonTasks["id"][std::to_string(ind)]["description"] = task.getDescription();
+            jsonTasks["id"][std::to_string(ind)]["dueTime"] = task.getTime();
+            jsonTasks["id"][std::to_string(ind)]["isCompleted"] = task.getCompl();
+            ind++;
+        }
+
+        f << jsonTasks;
+        f.close();
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
     }
 }
 
@@ -100,9 +125,9 @@ int main(int argc, char const *argv[])
     manager.add_task(newTask);
     manager.add_task(newTask);
 
-    manager.delete_task(1);
-
     manager.print_tasks();
+
+    manager.save_to_json();
 
     return 0;
 }
