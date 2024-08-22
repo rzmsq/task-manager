@@ -11,11 +11,11 @@ private:
     std::string title;
     std::string description;
     std::string dueTime;
-    bool isCompleted{false};
+    bool isCompleted;
 
 public:
     Task(const std::string &title, const std::string &description,
-         const std::string &time);
+         const std::string &time, const bool &isCompl);
     ~Task() {};
 
     const std::string &getTitle() const;
@@ -25,11 +25,12 @@ public:
 };
 
 Task::Task(const std::string &_title, const std::string &_description,
-           const std::string &_dueTme)
+           const std::string &_dueTme, const bool &_isCompl = false)
 {
     this->title = _title;
     this->description = _description;
     this->dueTime = _dueTme;
+    this->isCompleted = _isCompl;
 }
 
 const std::string &Task::getTitle() const
@@ -52,11 +53,15 @@ const bool &Task::getCompl() const
 class TaskManager
 {
 private:
+    using json = nlohmann::json;
+
     std::vector<Task> tasks;
     const std::string path{"./tasks.json"};
 
+    const void read_from_json();
+
 public:
-    TaskManager() {};
+    TaskManager() { read_from_json(); };
     ~TaskManager() {};
 
     const void add_task(const Task &task);
@@ -89,7 +94,6 @@ const void TaskManager::print_tasks() const
 
 const void TaskManager::save_to_json() const
 {
-    using json = nlohmann::json;
     try
     {
         json jsonTasks;
@@ -124,18 +128,48 @@ const void TaskManager::save_to_json() const
     }
 }
 
+const void TaskManager::read_from_json()
+{
+    try
+    {
+        json jsonTasks;
+
+        std::ifstream inFile(path);
+        if (!inFile.good())
+        {
+            std::cout << "The tasks file.json won't find it, the tasks are empty!" << std::endl;
+            return;
+        }
+
+        jsonTasks = json::parse(inFile);
+        inFile.close();
+        for (size_t i = 0; i < jsonTasks["id"].size(); i++)
+        {
+            Task newTask = Task(jsonTasks["id"][std::to_string(i)]["title"],
+                                jsonTasks["id"][std::to_string(i)]["description"],
+                                jsonTasks["id"][std::to_string(i)]["dueTime"],
+                                jsonTasks["id"][std::to_string(i)]["isCompleted"]);
+            this->add_task(newTask);
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
+
 int main(int argc, char const *argv[])
 {
 
     Task newTask = Task("test", "new test", "10.07.2023");
     TaskManager manager = TaskManager();
 
-    manager.add_task(newTask);
-    manager.add_task(newTask);
+    // manager.add_task(newTask);
+    // manager.add_task(newTask);
 
     manager.print_tasks();
 
-    manager.save_to_json();
+    // manager();
 
     return 0;
 }
