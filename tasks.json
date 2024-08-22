@@ -11,17 +11,14 @@
             "dueTime": "10.07.2023",
             "isCompleted": false,
             "title": "test"
-        }
-    }
-}{
-    "id": {
-        "0": {
+        },
+        "2": {
             "description": "new test",
             "dueTime": "10.07.2023",
             "isCompleted": false,
             "title": "test"
         },
-        "1": {
+        "3": {
             "description": "new test",
             "dueTime": "10.07.2023",
             "isCompleted": false,

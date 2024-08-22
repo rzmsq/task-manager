@@ -92,11 +92,19 @@ const void TaskManager::save_to_json() const
     using json = nlohmann::json;
     try
     {
-        std::ofstream f(path, std::ios_base::app);
+        json jsonTasks;
+
+        std::ifstream inFile(path);
+        if (inFile.good())
+        {
+            jsonTasks = json::parse(inFile);
+            inFile.close();
+        }
+
+        std::ofstream f(path);
         if (!f.is_open())
             throw "err";
 
-        json jsonTasks{};
         size_t ind{0};
         for (auto &&task : tasks)
         {
