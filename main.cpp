@@ -53,7 +53,7 @@ int main(int argc, char const *argv[])
 
 const bool isAllDigit(const std::string &input)
 {
-    std::regex digitReg("[0-9]");
+    std::regex digitReg("^[0-9]+$");
     return std::regex_match(input, digitReg);
 }
 
