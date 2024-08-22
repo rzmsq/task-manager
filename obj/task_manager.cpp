@@ -9,6 +9,9 @@ const void TaskManager::delete_task(const size_t &id)
 {
     try
     {
+        if (id > tasks.size() - 1)
+            throw std::runtime_error("Incorrect id");
+
         tasks.erase(tasks.begin() + (id - 1));
     }
     catch (const std::exception &e)
@@ -19,14 +22,17 @@ const void TaskManager::delete_task(const size_t &id)
 
 const void TaskManager::print_tasks() const
 {
+    std::cout << std::endl;
+    std::cout << "id|\t|Title|\t|Description|\t|Due time|\t|Status|" << std::endl;
     size_t ind{0};
     for (auto &&task : this->tasks)
     {
         const std::string Compl = task.getCompl() ? "Completed" : "In progress";
         std::cout << ind << "|\t|" << task.getTitle() << "|\t|" << task.getDescription()
-                  << "|\t|" << task.getTime() << "|\t|" << Compl << std::endl;
+                  << "|\t|" << task.getTime() << "|\t|" << Compl << '|' << std::endl;
         ind++;
     }
+    std::cout << std::endl;
 }
 
 const void TaskManager::save_to_json() const
